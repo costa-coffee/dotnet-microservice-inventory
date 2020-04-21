@@ -38,13 +38,17 @@ namespace Inventory.Controllers
 
             IQueryable<StoreInventoryItem> query = _context.StoreInventoryItem
                 .Include(a => a.StoreNavigation)
-                .Include(a => a.ItemNavigation);
+                .Include(a => a.ItemNavigation)
+                .Where(a => a.StoreNavigation.Code == code);
 
             if (filters.Sku != null)
             {
-                query = query
-                    .Where(a => a.StoreNavigation.Code == code)
-                    .Where(a => filters.Sku.Value.Contains(a.ItemNavigation.Sku));
+                query = query.Where(a => filters.Sku.Value.Contains(a.ItemNavigation.Sku));
+            }
+
+            if (filters.Updated != null)
+            {
+                query = query.Where(a => a.Updated >= filters.Updated.Value);
             }
 
             List<StoreInventoryItem> items = await query.ToListAsync();
