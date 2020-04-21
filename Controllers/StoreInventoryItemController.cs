@@ -32,6 +32,8 @@ namespace Inventory.Controllers
                 PropertyNamingPolicy = new SnakeCaseNamingPolicy()
             };
 
+            options.Converters.Add(new JsonStringEnumConverter(new SnakeCaseNamingPolicy()));
+
             StoreInventoryItemFilters filters = JsonSerializer.Deserialize<StoreInventoryItemFilters>(request.Filters, options);
             return await _context.Store.ToListAsync();
         }

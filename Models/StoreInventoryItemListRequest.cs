@@ -27,7 +27,13 @@ namespace Inventory.Models
         {
         }
 
-        public string Condition { get; set; }
+        public Condition Condition { get; set; }
         public string[] Value { get; set; }
+    }
+
+    public enum Condition
+    {
+        In,
+        Gte
     }
 }
