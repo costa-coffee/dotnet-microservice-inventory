@@ -25,7 +25,7 @@ namespace Inventory.Controllers
         }
 
         [HttpGet("stores/{code}/inventory-items")]
-        public async Task<List<Store>> Get(string code, [FromQuery]StoreInventoryItemListRequest request)
+        public async Task<List<StoreInventoryItemResponse>> Get(string code, [FromQuery]StoreInventoryItemListRequest request)
         {
             var options = new JsonSerializerOptions
             {
@@ -35,7 +35,24 @@ namespace Inventory.Controllers
             options.Converters.Add(new JsonStringEnumConverter(new SnakeCaseNamingPolicy()));
 
             StoreInventoryItemFilters filters = JsonSerializer.Deserialize<StoreInventoryItemFilters>(request.Filters, options);
-            return await _context.Store.ToListAsync();
+
+            List<StoreInventoryItem> items = await _context.StoreInventoryItem
+                .Include(a => a.StoreNavigation)
+                .Include(a => a.ItemNavigation)
+                .Where(a => a.StoreNavigation.Code == code)
+                .Where(a => filters.Sku.Value.Contains(a.ItemNavigation.Sku))
+                .ToListAsync();
+
+            return items
+                .Select((a, index) => new StoreInventoryItemResponse
+                {
+                    Available = a.Available,
+                    Item = a.ItemNavigation.Sku,
+                    Store = a.StoreNavigation.Code,
+                    Created = a.Created,
+                    Updated = a.Updated
+                })
+                .ToList();
         }
 
         [HttpPut("stores/{code}/inventory-items/{sku}")]
