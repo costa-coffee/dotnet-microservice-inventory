@@ -36,12 +36,18 @@ namespace Inventory.Controllers
 
             StoreInventoryItemFilters filters = JsonSerializer.Deserialize<StoreInventoryItemFilters>(request.Filters, options);
 
-            List<StoreInventoryItem> items = await _context.StoreInventoryItem
+            IQueryable<StoreInventoryItem> query = _context.StoreInventoryItem
                 .Include(a => a.StoreNavigation)
-                .Include(a => a.ItemNavigation)
-                .Where(a => a.StoreNavigation.Code == code)
-                .Where(a => filters.Sku.Value.Contains(a.ItemNavigation.Sku))
-                .ToListAsync();
+                .Include(a => a.ItemNavigation);
+
+            if (filters.Sku != null)
+            {
+                query = query
+                    .Where(a => a.StoreNavigation.Code == code)
+                    .Where(a => filters.Sku.Value.Contains(a.ItemNavigation.Sku));
+            }
+
+            List<StoreInventoryItem> items = await query.ToListAsync();
 
             return items
                 .Select((a, index) => new StoreInventoryItemResponse

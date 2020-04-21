@@ -1,7 +1,4 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-
-namespace Inventory.Models
+﻿namespace Inventory.Models
 {
     public class StoreInventoryItemListRequest
     {
@@ -18,7 +15,7 @@ namespace Inventory.Models
         {
         }
 
-        public StoreInventoryItemFilterSKU Sku { get; set; }
+        public StoreInventoryItemFilterSKU? Sku { get; set; }
     }
 
     public class StoreInventoryItemFilterSKU
