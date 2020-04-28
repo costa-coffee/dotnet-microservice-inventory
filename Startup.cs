@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WRS;
 
 namespace Inventory
 {
@@ -19,6 +20,12 @@ namespace Inventory
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton(new WRSClient(
+                "https://coseq-uat01.datasym.co.uk:44333/StockAPIUAT/",
+                "5D310E47-50D9-4B80-B345-31622C70BC09",
+                "23df81fa-928c-4e37-a5c2-dd2af7a97196"
+            ));
+
             services.AddDbContext<InventoryContext>();
             services.AddControllers().AddJsonOptions(
                 options =>

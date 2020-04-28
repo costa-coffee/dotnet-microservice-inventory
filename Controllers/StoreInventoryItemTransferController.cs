@@ -3,23 +3,39 @@ using Microsoft.AspNetCore.Mvc;
 using Inventory.Models;
 using WRS;
 using System.Net.Http;
+using System.Linq;
 
 namespace Inventory.Controllers
 {
+
     [ApiController]
     [Route("")]
     public class StoreInventoryItemTransferController : ControllerBase
     {
+        public StoreInventoryItemTransferController(WRSClient client)
+        {
+            _Client = client;
+        }
+
+        private readonly WRSClient _Client;
+
         [HttpPost("stores/{code}/inventory-item-transfers")]
         public async Task<StatusCodeResult> Post(string code, [FromBody]StoreInventoryItemTransferRequest transfer)
         {
-            var client = new WRSClient(
-                "https://coseq-uat01.datasym.co.uk:44333/StockAPIUAT/",
-                "5D310E47-50D9-4B80-B345-31622C70BC09",
-                "23df81fa-928c-4e37-a5c2-dd2af7a97196"
-            );
+            var payload = new StockTransferRequest
+            {
+                Store = code,
+                Items = transfer.Items.Select((a, index) => new StockTransferItem
+                {
+                    Code = a.Sku,
+                    Quantity = a.Quantity,
+                    Modifiers = a.Modifiers,
+                })
+                .ToArray()
+            };
 
-            var response = await client.Authenticate();
+            var response = await _Client.CreateStockTransfer(payload);
+            var body = await response.Content.ReadAsStringAsync();
 
             return Ok();
         }
